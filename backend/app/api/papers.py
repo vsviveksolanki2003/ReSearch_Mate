@@ -5,6 +5,7 @@ from fastapi import APIRouter, File, UploadFile, HTTPException, status
 from backend.app.schemas.paper import PaperUploadResponse, PaperListItem, ChunkSchema
 from backend.app.services.pdf_processor import PDFProcessor
 from backend.app.services.retriever import HybridRetriever
+from backend.app.utils.security import sanitize_filename, validate_pdf_content, check_file_size
 
 router = APIRouter(prefix="/papers", tags=["Papers"])
 
@@ -37,10 +38,23 @@ async def upload_paper(file: UploadFile = File(...)):
             detail="Uploaded file is empty."
         )
 
+    if not check_file_size(file_bytes):
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size exceeds maximum allowed threshold of 50MB."
+        )
+
+    if not validate_pdf_content(file_bytes):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid PDF file format. Missing %PDF- header signature."
+        )
+
+    safe_filename = sanitize_filename(file.filename)
     paper_id = f"paper-{uuid.uuid4().hex[:8]}"
 
     try:
-        extracted = pdf_processor.extract_document(file_bytes, file.filename)
+        extracted = pdf_processor.extract_document(file_bytes, safe_filename)
         chunks = pdf_processor.chunk_sections(
             paper_id=paper_id,
             sections=extracted["sections"]
