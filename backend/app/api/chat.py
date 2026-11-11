@@ -47,7 +47,7 @@ async def query_chat(request: QueryRequest):
     )
 
 @router.post("/export")
-async def export_review(request: QueryRequest, format: str = Query("markdown", regex="^(markdown|latex)$")):
+async def export_review(request: QueryRequest, format: str = Query("markdown", pattern="^(markdown|latex)$")):
     """Synthesize and export academic literature review document in Markdown or LaTeX format."""
     workflow = ResearchWorkflow(retriever=get_retriever())
     result = await workflow.run(
