@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, ShieldCheck, Sparkles, Table } from 'lucide-react';
+import { Send, Bot, ShieldCheck, Sparkles, Table, Download, FileText } from 'lucide-react';
 import { CitationItem, ResearchGapItem } from '../services/api';
 
 interface Message {
@@ -152,12 +152,56 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           <Bot className="w-5 h-5 text-emerald-400" />
           <span className="font-semibold text-slate-200">Multi-Agent Research Chat</span>
         </div>
-        {agentStatus && (
-          <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-3 py-1 rounded-full animate-pulse">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{agentStatus}</span>
+        <div className="flex items-center gap-3">
+          {agentStatus && (
+            <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-3 py-1 rounded-full animate-pulse">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{agentStatus}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={async () => {
+                const res = await fetch('/api/chat/export?format=markdown', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ query: 'Academic Literature Review', paper_ids: selectedPaperIds, stream: false })
+                });
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'literature_review.md';
+                a.click();
+              }}
+              className="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded flex items-center gap-1 transition border border-slate-700"
+              title="Download literature review in Markdown"
+            >
+              <Download className="w-3 h-3 text-emerald-400" />
+              <span>Export MD</span>
+            </button>
+            <button
+              onClick={async () => {
+                const res = await fetch('/api/chat/export?format=latex', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ query: 'Academic Literature Review', paper_ids: selectedPaperIds, stream: false })
+                });
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'literature_review.tex';
+                a.click();
+              }}
+              className="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded flex items-center gap-1 transition border border-slate-700"
+              title="Download literature review in LaTeX"
+            >
+              <FileText className="w-3 h-3 text-sky-400" />
+              <span>LaTeX</span>
+            </button>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Messages */}
