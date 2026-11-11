@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
-import { FileText, Upload, CheckSquare, Square, Layers } from 'lucide-react';
+import { FileText, Upload, CheckSquare, Square, Layers, UserCircle, LogOut } from 'lucide-react';
 import { PaperItem } from '../services/api';
+import { UserProfile } from '../services/auth';
 
 interface PaperSidebarProps {
   papers: PaperItem[];
@@ -10,6 +11,9 @@ interface PaperSidebarProps {
   activePaperId: string | null;
   onUpload: (file: File) => void;
   isUploading: boolean;
+  user: UserProfile | null;
+  onOpenAuth: () => void;
+  onLogout: () => void;
 }
 
 export const PaperSidebar: React.FC<PaperSidebarProps> = ({
@@ -20,6 +24,9 @@ export const PaperSidebar: React.FC<PaperSidebarProps> = ({
   activePaperId,
   onUpload,
   isUploading,
+  user,
+  onOpenAuth,
+  onLogout,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -109,8 +116,36 @@ export const PaperSidebar: React.FC<PaperSidebarProps> = ({
         )}
       </div>
 
-      <div className="pt-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-        Offline • pgvector • Ollama 8B
+      <div className="pt-4 border-t border-slate-800">
+        {user ? (
+          <div className="flex items-center justify-between text-xs text-slate-300">
+            <div className="flex items-center gap-2 min-w-0">
+              <UserCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="truncate">
+                <div className="font-semibold text-slate-200">{user.username}</div>
+                <div className="text-[10px] text-slate-400">{user.workspace_id}</div>
+              </div>
+            </div>
+            <button
+              onClick={onLogout}
+              className="p-1 hover:text-rose-400 text-slate-500 rounded transition"
+              title="Sign Out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onOpenAuth}
+            className="w-full py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 transition"
+          >
+            <UserCircle className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Sign In / Workspace</span>
+          </button>
+        )}
+        <div className="mt-2 text-[10px] text-slate-500 text-center">
+          Offline • pgvector • Ollama 8B
+        </div>
       </div>
     </div>
   );

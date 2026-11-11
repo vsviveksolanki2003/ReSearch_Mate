@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { PaperSidebar } from './components/PaperSidebar';
 import { ChatPanel } from './components/ChatPanel';
 import { PDFViewerPanel } from './components/PDFViewerPanel';
+import { AuthModal } from './components/AuthModal';
 import { fetchPapers, uploadPaperFile, PaperItem } from './services/api';
+import { getStoredUser, logoutUser, UserProfile } from './services/auth';
 
 export const App: React.FC = () => {
   const [papers, setPapers] = useState<PaperItem[]>([]);
@@ -10,6 +12,12 @@ export const App: React.FC = () => {
   const [activePaper, setActivePaper] = useState<PaperItem | null>(null);
   const [targetCitationPage, setTargetCitationPage] = useState<number>(1);
   const [isUploading, setIsUploading] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
 
   const loadPapers = async () => {
     const list = await fetchPapers();
@@ -54,6 +62,11 @@ export const App: React.FC = () => {
     setTargetCitationPage(page);
   };
 
+  const handleLogout = () => {
+    logoutUser();
+    setUser(null);
+  };
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-950 select-none">
       <PaperSidebar
@@ -64,6 +77,9 @@ export const App: React.FC = () => {
         activePaperId={activePaper ? activePaper.id : null}
         onUpload={handleUpload}
         isUploading={isUploading}
+        user={user}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
       />
       <ChatPanel
         selectedPaperIds={selectedPaperIds}
@@ -72,6 +88,11 @@ export const App: React.FC = () => {
       <PDFViewerPanel
         activePaper={activePaper}
         targetPage={targetCitationPage}
+      />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={(u) => setUser(u)}
       />
     </div>
   );
