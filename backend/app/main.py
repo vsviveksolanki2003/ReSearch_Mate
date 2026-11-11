@@ -5,13 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from backend.app.config import settings
 from backend.app.api.router import api_router
+from backend.app.db.session import db_manager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ensure storage directories exist
     settings.STORAGE_DIR.mkdir(parents=True, exist_ok=True)
     settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    await db_manager.init_pool()
     yield
+    await db_manager.close_pool()
 
 app = FastAPI(
     title=settings.APP_NAME,
