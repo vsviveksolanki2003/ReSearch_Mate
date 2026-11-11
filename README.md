@@ -52,8 +52,8 @@ The system is designed for researchers who need reliable, reproducible, and audi
 
 | Member | Role | Branch |
 |---|---|---|
-| Vivek Solanki | Infrastructure, API, Auth, Security | `feature/infra-api-architecture`, `feature/security-validation-hardening`, `feature/auth-user-workspaces` |
-| Saksham Mahato | PDF Processing, Embeddings, Database, Retrieval | `feature/pdf-processing-database-retrieval`, `feature/database-pgvector-reranker`, `feature/async-pgvector-pool` |
+| [Vivek Solanki](https://github.com/vsviveksolanki2003) | Infrastructure, API, Auth, Security | `feature/infra-api-architecture`, `feature/security-validation-hardening`, `feature/auth-user-workspaces` |
+| [Saksham Mahato](https://github.com/sakshammahato777-star) | PDF Processing, Embeddings, Database, Retrieval | `feature/pdf-processing-database-retrieval`, `feature/database-pgvector-reranker`, `feature/async-pgvector-pool` |
 | Grishma Doshi | Agents, Citation Verifier, Training Pipeline, Evaluation | `feature/agents-langgraph-citations`, `feature/advanced-agents-review-exporter`, `feature/model-training-finetuning` |
 | Priyanshu Thakur | Frontend UI, PDF Canvas, Export UI, Auth UI | `feature/frontend-ui-pdf-viewer`, `feature/pdf-canvas-rendering-ui`, `feature/frontend-auth-workspaces` |
 
