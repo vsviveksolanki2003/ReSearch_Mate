@@ -61,3 +61,4 @@ data/
 storage/
 *.pdf
 !tests/**/*.pdf
+*.bundle
