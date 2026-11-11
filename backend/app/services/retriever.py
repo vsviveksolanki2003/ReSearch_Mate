@@ -4,10 +4,12 @@ import re
 from typing import List, Dict, Any, Optional
 from backend.app.schemas.paper import ChunkSchema
 from backend.app.services.embeddings import EmbeddingService
+from backend.app.services.reranker import CrossEncoderReranker
 
 class HybridRetriever:
-    def __init__(self, embedding_service: Optional[EmbeddingService] = None):
+    def __init__(self, embedding_service: Optional[EmbeddingService] = None, reranker: Optional[CrossEncoderReranker] = None):
         self.embedding_service = embedding_service or EmbeddingService()
+        self.reranker = reranker or CrossEncoderReranker()
         self._chunks: Dict[str, ChunkSchema] = {}
         self._vectors: Dict[str, List[float]] = {}
 
@@ -69,8 +71,21 @@ class HybridRetriever:
                 "lexical_score": lexical_score
             })
 
-        # Rank by score descending
+        # Rank by initial hybrid score
         scored_results.sort(key=lambda x: x["score"], reverse=True)
+        candidates = [item["chunk"] for item in scored_results[:top_k * 3]]
+        
+        # 2nd stage Cross-Encoder Reranking
+        if candidates and self.reranker:
+            reranked_chunks = self.reranker.rerank(query=query, candidates=candidates, top_k=top_k)
+            # Map back to result structure
+            final_results = []
+            chunk_map = {item["chunk"].id: item for item in scored_results}
+            for c in reranked_chunks:
+                if c.id in chunk_map:
+                    final_results.append(chunk_map[c.id])
+            return final_results
+
         return scored_results[:top_k]
 
     def benchmark(self, query: str, top_k: int = 5) -> Dict[str, Any]:
@@ -86,3 +101,4 @@ class HybridRetriever:
             "latency_ms": round(elapsed_ms, 3),
             "top_score": results[0]["score"] if results else 0.0
         }
+
